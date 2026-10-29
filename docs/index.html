@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gallium — Free Windows PC diagnostic &amp; optimizer</title>
+<meta name="description" content="Gallium tells you what's fine, what to watch and what's failing in your Windows PC: component health, blue screens explained, stability tests, reversible tweaks, FPS estimates and PDF reports. Free and open source.">
+<link rel="icon" href="images/logo.svg" type="image/svg+xml">
+<link rel="canonical" href="https://frenchwith0skill.github.io/gallium/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Gallium — Free Windows PC diagnostic &amp; optimizer">
+<meta property="og:description" content="Component health, blue screens explained, stability tests, one-click reversible tweaks and FPS estimates. Free and open source.">
+<meta property="og:url" content="https://frenchwith0skill.github.io/gallium/">
+<meta property="og:image" content="https://frenchwith0skill.github.io/gallium/images/social-preview.png">
+<meta name="twitter:card" content="summary_large_image">
+<script>document.documentElement.classList.add('js');</script>
+<style>
+  :root {
+    --bg: #0b0f14; --panel: #121821; --panel2: #18202b; --line: #243040;
+    --text: #e7edf5; --muted: #8b9aae; --green: #3ddc97; --cyan: #2aa8c9; --coral: #ff5e5b;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.6; overflow-x: hidden;
+  }
+  a { color: var(--green); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+
+  /* Fond : halos lumineux qui dérivent lentement */
+  .bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+  .bg i { position: absolute; border-radius: 50%; filter: blur(90px); opacity: .55; }
+  .bg i:nth-child(1) { width: 620px; height: 620px; background: rgba(61,220,151,.30); top: -220px; left: -160px; animation: drift1 22s ease-in-out infinite alternate; }
+  .bg i:nth-child(2) { width: 560px; height: 560px; background: rgba(42,168,201,.22); top: 30%; right: -200px; animation: drift2 26s ease-in-out infinite alternate; }
+  .bg i:nth-child(3) { width: 480px; height: 480px; background: rgba(61,220,151,.14); bottom: -200px; left: 30%; animation: drift1 30s ease-in-out infinite alternate-reverse; }
+  @keyframes drift1 { to { transform: translate(140px, 90px) scale(1.15); } }
+  @keyframes drift2 { to { transform: translate(-120px, -110px) scale(.9); } }
+
+  nav { display: flex; align-items: center; justify-content: space-between; padding: 20px 0; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 20px; color: var(--text); }
+  .brand:hover { text-decoration: none; }
+  .brand img { width: 34px; height: 34px; animation: glow 3.5s ease-in-out infinite; }
+  @keyframes glow { 50% { filter: drop-shadow(0 0 10px rgba(61,220,151,.75)); transform: rotate(-4deg) scale(1.06); } }
+  nav .links { display: flex; gap: 22px; align-items: center; font-size: 15px; }
+  nav .links a { color: var(--muted); position: relative; }
+  nav .links a::after { content: ""; position: absolute; left: 0; right: 0; bottom: -3px; height: 2px; background: var(--green); transform: scaleX(0); transition: transform .25s; }
+  nav .links a:hover { color: var(--text); text-decoration: none; }
+  nav .links a:hover::after { transform: scaleX(1); }
+
+  .hero { display: grid; grid-template-columns: 1fr 1.25fr; gap: 48px; align-items: center; padding: 56px 0 56px; }
+  h1 { font-size: clamp(36px, 5vw, 56px); line-height: 1.08; letter-spacing: -1px; font-weight: 800; }
+  h1 em { font-style: normal; background: linear-gradient(90deg, var(--green), var(--cyan), var(--green)); background-size: 200% auto;
+    -webkit-background-clip: text; background-clip: text; color: transparent; animation: shine 5s linear infinite; }
+  @keyframes shine { to { background-position: 200% center; } }
+  .lead { margin-top: 18px; font-size: 19px; color: #c6d1de; }
+  .cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+  .btn { position: relative; overflow: hidden; display: inline-flex; align-items: center; gap: 9px; padding: 13px 22px; border-radius: 11px; font-weight: 700; font-size: 16px;
+    border: 1px solid var(--line); color: var(--text); background: var(--panel); transition: transform .2s, box-shadow .2s, border-color .2s; }
+  .btn:hover { text-decoration: none; border-color: #36475d; transform: translateY(-2px); }
+  .btn.primary { background: var(--green); color: #06251a; border-color: var(--green); box-shadow: 0 0 0 rgba(61,220,151,0); }
+  .btn.primary:hover { box-shadow: 0 10px 30px rgba(61,220,151,.35); }
+  .btn.primary::after { content: ""; position: absolute; top: 0; left: -60%; width: 40%; height: 100%;
+    background: linear-gradient(100deg, transparent, rgba(255,255,255,.55), transparent); transform: skewX(-20deg); animation: sweep 3.8s ease-in-out infinite; }
+  @keyframes sweep { 0%, 60% { left: -60%; } 100% { left: 130%; } }
+  .btn svg { width: 18px; height: 18px; }
+  .meta { margin-top: 16px; font-size: 14px; color: var(--muted); }
+
+  .shot { width: 100%; border-radius: 14px; border: 1px solid var(--line); box-shadow: 0 30px 80px rgba(0,0,0,.55); display: block; }
+  .hero-shot { perspective: 1400px; }
+  .hero-shot .shot { animation: float 7s ease-in-out infinite; transform: rotateY(-8deg) rotateX(3deg); transition: transform .3s; }
+  @keyframes float { 50% { translate: 0 -14px; } }
+
+  /* Chiffres clés */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; padding-bottom: 24px; }
+  .stat { text-align: center; padding: 20px 10px; border: 1px solid var(--line); border-radius: 14px; background: rgba(18,24,33,.7); }
+  .stat b { display: block; font-size: 36px; font-weight: 800; color: var(--green); line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .stat span { color: var(--muted); font-size: 14px; }
+
+  section { padding: 64px 0; }
+  h2 { font-size: 32px; letter-spacing: -.5px; font-weight: 800; }
+  .sub { color: var(--muted); margin-top: 8px; font-size: 17px; }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 32px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 22px; transition: transform .25s, border-color .25s, box-shadow .25s; }
+  .card:hover { transform: translateY(-5px); border-color: rgba(61,220,151,.45); box-shadow: 0 16px 40px rgba(0,0,0,.35), 0 0 0 1px rgba(61,220,151,.12); }
+  .card .ic { font-size: 26px; display: inline-block; transition: transform .3s; }
+  .card:hover .ic { transform: scale(1.25) rotate(-8deg); }
+  .card h3 { font-size: 18px; margin: 10px 0 6px; }
+  .card p { color: var(--muted); font-size: 15px; }
+
+  /* Galerie : défilement continu, pause au survol */
+  .gallery { margin-top: 32px; overflow: hidden; padding: 20px 0 30px;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+  .track { display: flex; gap: 22px; width: max-content; animation: marquee 55s linear infinite; }
+  .gallery:hover .track { animation-play-state: paused; }
+  @keyframes marquee { to { transform: translateX(calc(-50% - 11px)); } }
+  .track figure { margin: 0; flex: none; cursor: zoom-in; }
+  .track img { height: 320px; width: auto; border-radius: 12px; border: 1px solid var(--line); box-shadow: 0 20px 50px rgba(0,0,0,.5); display: block; transition: transform .3s, border-color .3s; }
+  .track figure:hover img { transform: scale(1.04); border-color: rgba(61,220,151,.55); }
+  .track figcaption { color: var(--muted); font-size: 14px; margin-top: 10px; text-align: center; }
+
+  .lightbox { position: fixed; inset: 0; z-index: 10; background: rgba(5,8,12,.88); backdrop-filter: blur(6px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+    padding: 24px; opacity: 0; pointer-events: none; transition: opacity .25s; cursor: zoom-out; }
+  .lightbox.open { opacity: 1; pointer-events: auto; }
+  .lightbox img { max-width: 100%; max-height: 82vh; border-radius: 12px; border: 1px solid var(--line); transform: scale(.94); transition: transform .3s; }
+  .lightbox.open img { transform: none; }
+  .lightbox p { color: var(--muted); }
+
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 32px; }
+  .split .card ul { margin-top: 10px; padding-left: 20px; color: #c6d1de; font-size: 15px; }
+  .split .card li { margin: 4px 0; }
+  .tag { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; padding: 3px 10px; border-radius: 999px; border: 1px solid; }
+  .tag.g { color: var(--green); border-color: rgba(61,220,151,.45); }
+  .tag.c { color: var(--cyan); border-color: rgba(42,168,201,.5); }
+
+  .langs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
+  .langs span { background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; font-size: 14px; color: #c6d1de; transition: transform .2s, border-color .2s, color .2s; }
+  .langs span:hover { transform: translateY(-3px); border-color: var(--green); color: var(--text); }
+  .langs span.on { border-color: var(--green); color: #06251a; background: var(--green); transform: translateY(-3px) scale(1.06); box-shadow: 0 6px 20px rgba(61,220,151,.35); }
+
+  /* Titre qui change de langue toutes les 1,5 seconde */
+  .rotating { min-height: 1.5em; overflow: hidden; }
+  #langline { display: inline-block; transition: opacity .45s ease, transform .45s cubic-bezier(.2,.7,.2,1), filter .45s ease; }
+  #langline.out { opacity: 0; transform: translateY(-60%); filter: blur(4px); }
+  #langline.pre { opacity: 0; transform: translateY(60%); filter: blur(4px); transition: none; }
+
+  .faq { margin-top: 28px; display: grid; gap: 10px; }
+  details { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px 20px; transition: border-color .2s; }
+  details[open] { border-color: rgba(61,220,151,.4); }
+  summary { cursor: pointer; font-weight: 700; list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: "+"; color: var(--green); font-size: 22px; line-height: 1; transition: transform .25s; }
+  details[open] summary::after { transform: rotate(45deg); }
+  details p { color: var(--muted); margin-top: 10px; font-size: 15px; }
+  details[open] p { animation: drop .3s ease-out; }
+  @keyframes drop { from { opacity: 0; transform: translateY(-6px); } }
+
+  .support { text-align: center; background: linear-gradient(135deg, rgba(61,220,151,.10), rgba(42,168,201,.08)); border: 1px solid var(--line); border-radius: 18px; padding: 44px 24px; }
+  .support .btn.kofi { background: var(--coral); border-color: var(--coral); color: #fff; margin-top: 22px; }
+  .support .btn.kofi:hover { box-shadow: 0 10px 30px rgba(255,94,91,.35); }
+  .heart { display: inline-block; animation: beat 1.4s ease-in-out infinite; }
+  @keyframes beat { 15%, 45% { transform: scale(1.25); } 30% { transform: scale(1); } }
+
+  footer { border-top: 1px solid var(--line); padding: 28px 0 40px; color: var(--muted); font-size: 14px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; }
+
+  /* Apparition au défilement (seulement si JavaScript est actif) */
+  .js .reveal { opacity: 0; transform: translateY(28px); transition: opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1); transition-delay: var(--d, 0s); }
+  .js .reveal.in { opacity: 1; transform: none; }
+
+  @media (max-width: 860px) {
+    .hero { grid-template-columns: 1fr; padding-top: 24px; }
+    .grid, .stats { grid-template-columns: 1fr 1fr; }
+    .split { grid-template-columns: 1fr; }
+    nav .links a.hide-sm { display: none; }
+    .track img { height: 200px; }
+  }
+  @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="bg" aria-hidden="true"><i></i><i></i><i></i></div>
+
+<div class="wrap">
+  <nav>
+    <a class="brand" href="#"><img src="images/logo.svg" alt="">Gallium</a>
+    <div class="links">
+      <a class="hide-sm" href="#features">Features</a>
+      <a class="hide-sm" href="#screenshots">Screenshots</a>
+      <a class="hide-sm" href="#faq">FAQ</a>
+      <a href="https://github.com/FrenchWith0Skill/gallium">GitHub</a>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div>
+      <h1 class="reveal">Know what's <em>fine</em>, what to watch and what's <em>failing</em> in your PC.</h1>
+      <p class="lead reveal" style="--d:.1s">Gallium diagnoses every component of your Windows PC in 30 seconds, explains blue screens, tests stability and applies reversible optimizations. Free and open source.</p>
+      <div class="cta reveal" style="--d:.2s">
+        <a class="btn primary" href="https://github.com/FrenchWith0Skill/gallium/releases/latest">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>
+          Download for Windows</a>
+        <a class="btn" href="https://github.com/FrenchWith0Skill/gallium">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.2.5-2.3 1.2-3.1-.1-.4-.5-1.6.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.6 1.6.2 2.8.1 3.2.8.8 1.2 1.9 1.2 3.1 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .5z"/></svg>
+          Source code</a>
+      </div>
+      <p class="meta reveal" style="--d:.3s">Windows 10 / 11 · Installer or portable · 20 languages · GPL-3.0</p>
+    </div>
+    <div class="hero-shot reveal" style="--d:.15s"><img class="shot" id="tilt" src="images/01-home.png" alt="Gallium home screen with usage scores"></div>
+  </header>
+
+  <div class="stats">
+    <div class="stat reveal"><b data-count="30" data-suffix=" s">30 s</b><span>for a full health check of your PC</span></div>
+    <div class="stat reveal" style="--d:.08s"><b data-count="0">0</b><span>data collected: everything stays on your PC</span></div>
+    <div class="stat reveal" style="--d:.16s"><b data-count="20">20</b><span>languages</span></div>
+    <div class="stat reveal" style="--d:.24s"><b data-count="100" data-suffix="%">100%</b><span>free and open source, no ads</span></div>
+  </div>
+</div>
+
+<section id="features">
+  <div class="wrap">
+    <h2 class="reveal">Everything your PC needs, in one free tool</h2>
+    <p class="sub reveal">No account, no ads, no telemetry. Everything runs on your PC.</p>
+    <div class="grid">
+      <div class="card reveal"><div class="ic">🩺</div><h3>Health diagnostic</h3><p>Processor, graphics card, memory, every drive (SMART), battery, network and drivers, each one rated OK, Watch or Failing.</p></div>
+      <div class="card reveal" style="--d:.08s"><div class="ic">💥</div><h3>Blue screens explained</h3><p>Stop codes decoded, crash dumps analyzed and the faulty driver or component named, along with unexpected shutdowns.</p></div>
+      <div class="card reveal" style="--d:.16s"><div class="ic">🧪</div><h3>Stability tests</h3><p>CPU at 100%, graphics card stress test, RAM check without restarting or the full Windows memory test.</p></div>
+      <div class="card reveal"><div class="ic">⚡</div><h3>Reversible optimizations</h3><p>Power plan, Game Mode, mouse acceleration, temporary files… One click, one click to undo, restore point first.</p></div>
+      <div class="card reveal" style="--d:.08s"><div class="ic">🎮</div><h3>Scores &amp; FPS estimates</h3><p>A score for every component, estimated FPS in about thirty games and a database of 470 CPUs and 300 GPUs.</p></div>
+      <div class="card reveal" style="--d:.16s"><div class="ic">📈</div><h3>Real-time monitor</h3><p>CPU per thread, memory, graphics card, temperature, network and the most active applications.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="screenshots">
+  <div class="wrap">
+    <h2 class="reveal">See it in action</h2>
+    <p class="sub reveal">Hover to pause, click to enlarge.</p>
+  </div>
+  <div class="gallery reveal">
+    <div class="track" id="track">
+      <figure><img src="images/01-home.png" alt="Home: usage scores" loading="lazy"><figcaption>Home: usage scores</figcaption></figure>
+      <figure><img src="images/02-components.png" alt="A score for every component" loading="lazy"><figcaption>A score for every component</figcaption></figure>
+      <figure><img src="images/03-diagnostic.png" alt="Health diagnostic" loading="lazy"><figcaption>Health diagnostic</figcaption></figure>
+      <figure><img src="images/04-analysis.png" alt="Windows analysis" loading="lazy"><figcaption>Windows analysis</figcaption></figure>
+      <figure><img src="images/05-monitor.png" alt="Real-time monitor" loading="lazy"><figcaption>Real-time monitor</figcaption></figure>
+      <figure><img src="images/06-component-database.png" alt="Component database" loading="lazy"><figcaption>Component database with per-game FPS</figcaption></figure>
+      <figure><img src="images/social-preview.png" alt="Gallium overview" loading="lazy"><figcaption>Gallium at a glance</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2 class="reveal">For gamers and for repair shops</h2>
+    <div class="split">
+      <div class="card reveal">
+        <span class="tag g">Personal</span>
+        <h3 style="margin-top:12px">Get the most out of your PC</h3>
+        <ul>
+          <li>Find what limits your FPS before buying an upgrade</li>
+          <li>Understand crashes and blue screens</li>
+          <li>Optimize Windows for gaming and streaming (OBS tips)</li>
+          <li>Compare CPU / GPU pairings in the component database</li>
+        </ul>
+      </div>
+      <div class="card reveal" style="--d:.1s">
+        <span class="tag c">Professional</span>
+        <h3 style="margin-top:12px">Diagnose client PCs faster</h3>
+        <ul>
+          <li>PDF reports with client name, reference and serial number</li>
+          <li>Client records with multi-PC history and before / after comparison</li>
+          <li>Detailed driver list and crash dump analysis</li>
+          <li>Portable version: runs from a USB stick, nothing to install</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2 class="reveal rotating"><span id="langline">Available in 20 languages</span></h2>
+    <div class="langs reveal" id="langs">
+      <span>English</span><span>Français</span><span>Español</span><span>Deutsch</span><span>Italiano</span>
+      <span>Português</span><span>Nederlands</span><span>Polski</span><span>Română</span><span>Svenska</span>
+      <span>Türkçe</span><span>Русский</span><span>Українська</span><span>العربية</span><span>हिन्दी</span>
+      <span>Bahasa Indonesia</span><span>Tiếng Việt</span><span>中文</span><span>日本語</span><span>한국어</span>
+    </div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap">
+    <h2 class="reveal">FAQ</h2>
+    <div class="faq">
+      <details class="reveal"><summary>Is Gallium really free?</summary><p>Yes. Gallium is free and open source under the GPL-3.0 license, with no ads and no paid version. You can support the project on Ko-fi if it helps you.</p></details>
+      <details class="reveal"><summary>Windows says "Windows protected your PC". Is it safe?</summary><p>The app is not code-signed yet, so SmartScreen doesn't know it. Click <b>More info → Run anyway</b>. The full source code is on GitHub so you can check exactly what it does.</p></details>
+      <details class="reveal"><summary>Why does it ask for administrator rights?</summary><p>Reading drive health (SMART), the Windows event logs and crash dumps, and creating a restore point all require administrator rights.</p></details>
+      <details class="reveal"><summary>Does Gallium send my data anywhere?</summary><p>No. Everything runs locally. The only network traffic is a ping to your router and to 1.1.1.1 to measure latency.</p></details>
+      <details class="reveal"><summary>Can optimizations break my PC?</summary><p>Each optimization only changes settings of your Windows account and can be undone in one click. A Windows restore point is created before the first change.</p></details>
+      <details class="reveal"><summary>Are the FPS figures real benchmarks?</summary><p>No, they are estimates computed from built-in performance tables. They are useful to compare hardware and spot bottlenecks, not to replace an in-game benchmark.</p></details>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="support reveal">
+      <h2>Support Gallium ☕</h2>
+      <p class="sub">Gallium is free and will stay free. A coffee or a ⭐ on GitHub helps keep it going.</p>
+      <a class="btn kofi" href="https://ko-fi.com/galliumpc"><span class="heart">♥</span> Support on Ko-fi</a>
+    </div>
+  </div>
+</section>
+
+<div class="wrap">
+  <footer>
+    <span>© 2026 FrenchWith0Skill · Gallium is licensed under the <a href="https://github.com/FrenchWith0Skill/gallium/blob/main/LICENSE.txt">GPL-3.0</a></span>
+    <span><a href="https://github.com/FrenchWith0Skill/gallium">GitHub</a> · <a href="https://github.com/FrenchWith0Skill/gallium/releases">Releases</a> · <a href="https://github.com/FrenchWith0Skill/gallium/issues">Report a bug</a></span>
+  </footer>
+</div>
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Screenshot"><img alt=""><p></p></div>
+
+<script>
+  // Galerie : on duplique les captures pour un défilement sans fin.
+  const track = document.getElementById('track');
+  [...track.children].forEach((f) => { const c = f.cloneNode(true); c.setAttribute('aria-hidden', 'true'); track.appendChild(c); });
+
+  // Agrandissement au clic
+  const box = document.getElementById('lightbox');
+  track.addEventListener('click', (e) => {
+    const fig = e.target.closest('figure'); if (!fig) return;
+    box.querySelector('img').src = fig.querySelector('img').src;
+    box.querySelector('p').textContent = fig.querySelector('figcaption').textContent;
+    box.classList.add('open');
+  });
+  const close = () => box.classList.remove('open');
+  box.addEventListener('click', close);
+  addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+
+  // Compteurs animés
+  const count = (el) => {
+    const end = +el.dataset.count, suffix = el.dataset.suffix || '', t0 = performance.now(), dur = 1400;
+    const step = (t) => { const p = Math.min(1, (t - t0) / dur); el.textContent = Math.round(end * (1 - Math.pow(1 - p, 3))) + suffix; if (p < 1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  };
+
+  // Apparition au défilement
+  const io = new IntersectionObserver((entries) => entries.forEach((e) => {
+    if (!e.isIntersecting) return;
+    e.target.classList.add('in');
+    e.target.querySelectorAll('[data-count]').forEach((el) => count(el));
+    io.unobserve(e.target);
+  }), { threshold: 0.15 });
+  document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+
+  // « Available in 20 languages » dans chaque langue, une toutes les 1,5 seconde ; la pastille correspondante s'allume.
+  const LINES = [
+    ['en', 'Available in 20 languages'], ['fr', 'Disponible en 20 langues'], ['es', 'Disponible en 20 idiomas'],
+    ['de', 'Verfügbar in 20 Sprachen'], ['it', 'Disponibile in 20 lingue'], ['pt', 'Disponível em 20 idiomas'],
+    ['nl', 'Beschikbaar in 20 talen'], ['pl', 'Dostępny w 20 językach'], ['ro', 'Disponibil în 20 de limbi'],
+    ['sv', 'Tillgänglig på 20 språk'], ['tr', '20 dilde kullanılabilir'], ['ru', 'Доступно на 20 языках'],
+    ['uk', 'Доступно 20 мовами'], ['ar', 'متوفر بـ 20 لغة'], ['hi', '20 भाषाओं में उपलब्ध'],
+    ['id', 'Tersedia dalam 20 bahasa'], ['vi', 'Có sẵn bằng 20 ngôn ngữ'], ['zh', '支持 20 种语言'],
+    ['ja', '20 の言語に対応'], ['ko', '20개 언어 지원'],
+  ];
+  const line = document.getElementById('langline');
+  const pills = document.querySelectorAll('#langs span');
+  let li = 0;
+  pills[0].classList.add('on');
+  setInterval(() => {
+    if (document.hidden) return;
+    line.classList.add('out');
+    setTimeout(() => {
+      li = (li + 1) % LINES.length;
+      const [code, text] = LINES[li];
+      line.textContent = text; line.lang = code; line.dir = code === 'ar' ? 'rtl' : 'ltr';
+      pills.forEach((p, i) => p.classList.toggle('on', i === li));
+      line.classList.remove('out'); line.classList.add('pre');
+      void line.offsetWidth;
+      line.classList.remove('pre');
+    }, 450);
+  }, 1500);
+
+  // Capture du haut de page qui suit légèrement la souris
+  const tilt = document.getElementById('tilt');
+  if (matchMedia('(hover: hover)').matches) {
+    tilt.parentElement.addEventListener('mousemove', (e) => {
+      const r = tilt.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
+      tilt.style.transform = `rotateY(${x * 14 - 4}deg) rotateX(${-y * 10 + 2}deg)`;
+    });
+    tilt.parentElement.addEventListener('mouseleave', () => { tilt.style.transform = ''; });
+  }
+</script>
+</body>
+</html>
