@@ -1,0 +1,66 @@
+{
+  "name": "gallium",
+  "productName": "Gallium",
+  "version": "1.0.0",
+  "description": "Gallium: diagnose, analyze and optimize your Windows PC — component health, stability tests, reversible tweaks, real-time monitor, game FPS estimates and PDF reports.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "node test/selftest.js",
+    "dist": "electron-builder --win nsis portable"
+  },
+  "license": "GPL-3.0-only",
+  "dependencies": {
+    "systeminformation": "^5.33.16"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8"
+  },
+  "author": "FrenchWith0Skill",
+  "build": {
+    "appId": "fr.gallium.app",
+    "productName": "Gallium",
+    "files": [
+      "main.js",
+      "preload.js",
+      "lib/**",
+      "renderer/**",
+      "locales/**",
+      "LICENSE.txt",
+      "package.json"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "requestedExecutionLevel": "requireAdministrator",
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "artifactName": "Gallium-Setup-${version}.${ext}",
+      "license": "LICENSE.txt"
+    },
+    "portable": {
+      "artifactName": "Gallium-Portable-${version}.${ext}",
+      "requestExecutionLevel": "admin"
+    }
+  },
+  "gallium": {
+    "supportUrl": "https://ko-fi.com/galliumpc",
+    "repoUrl": "https://github.com/FrenchWith0Skill/gallium"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/FrenchWith0Skill/gallium.git"
+  },
+  "homepage": "https://github.com/FrenchWith0Skill/gallium"
+}

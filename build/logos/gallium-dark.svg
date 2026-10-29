@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="fL" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#17985f"/><stop offset="1" stop-color="#0a5a39"/></linearGradient>
+    <linearGradient id="fR" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3ddc97"/><stop offset="1" stop-color="#139a63"/></linearGradient>
+    <linearGradient id="fT1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9dfccd"/><stop offset="1" stop-color="#46d892"/></linearGradient>
+    <linearGradient id="fT2" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d4ffe9"/><stop offset="1" stop-color="#7cefb8"/></linearGradient>
+    <!-- Texture « circuit imprimé » : pistes, vias et composants CMS -->
+    <pattern id="pcb" width="96" height="96" patternUnits="userSpaceOnUse">
+      <g fill="none" stroke="#d9ffee" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" opacity=".55">
+        <path d="M0 20H30L44 34H96M20 96V70L34 56V34M60 96V78H96M70 0V12L80 22"/>
+      </g>
+      <g fill="#d9ffee" opacity=".7">
+        <circle cx="44" cy="34" r="4.5"/><circle cx="34" cy="34" r="4.5"/><circle cx="80" cy="22" r="4.5"/><circle cx="60" cy="78" r="4.5"/>
+        <rect x="6" y="56" width="8" height="15" rx="2"/><rect x="52" y="4" width="15" height="8" rx="2"/><rect x="74" y="52" width="14" height="14" rx="2"/>
+      </g>
+    </pattern>
+    <g id="crystal">
+      <path d="M-80-120L0-80V215L-80 150Z" fill="url(#fL)"/>
+      <path d="M0-80L80-120V150L0 215Z" fill="url(#fR)"/>
+      <path d="M0-210L-80-120L0-80Z" fill="url(#fT1)"/>
+      <path d="M0-210L80-120L0-80Z" fill="url(#fT2)"/>
+      <path d="M-80-120L0-80V215L-80 150ZM0-80L80-120V150L0 215Z" fill="url(#pcb)"/>
+      <path d="M0-210L80-120V150L0 215L-80 150V-120ZM-80-120L0-80L80-120M0-80V215" fill="none" stroke="#06331f" stroke-width="7" stroke-linejoin="round"/>
+    </g>
+  </defs>
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="#0f1a17"/>
+  <g transform="translate(256 256) scale(.86) translate(-256 -256)">
+  <use xlink:href="#crystal" transform="translate(140 318) rotate(-26) scale(.6)"/>
+  <use xlink:href="#crystal" transform="translate(378 330) rotate(24) scale(.54)"/>
+  <use xlink:href="#crystal" transform="translate(256 262) scale(1.02)"/>
+  </g>
+</svg>
